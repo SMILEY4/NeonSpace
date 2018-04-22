@@ -32,7 +32,7 @@ public class CircleEnemy extends Enemy {
 		cellDst = world.getCell(x-1, y);
 		if(cellDst != null && canMoveTo(cellDst)) {
 			world.getCell(x, y).removeNow(this);
-			cellDst.add(this);
+			cellDst.add(this, false);
 		}
 
 		

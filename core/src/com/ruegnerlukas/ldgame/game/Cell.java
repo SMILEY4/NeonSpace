@@ -51,9 +51,13 @@ public class Cell {
 	
 	
 	
-	public void add(Entity e) {
+	public void add(Entity e, boolean isSpawn) {
 		e.x = x;
 		e.y = y;
+		if(isSpawn) {
+			e.lastX = x;
+			e.lastY = y;
+		}
 		entities.add(e);
 	}
 	

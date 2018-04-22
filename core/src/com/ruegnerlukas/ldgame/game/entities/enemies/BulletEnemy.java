@@ -46,7 +46,7 @@ public class BulletEnemy extends Enemy {
 			if(cellTarget != null) {
 				Bullet b = new Bullet();
 				b.source = this;
-				cellTarget.add(b);
+				cellTarget.add(b, true);
 				nShots++;
 			}
 			
@@ -71,7 +71,7 @@ public class BulletEnemy extends Enemy {
 			
 			if(cellDst != null && canMoveTo(cellDst)) {
 				world.getCell(x, y).removeNow(this);
-				cellDst.add(this);
+				cellDst.add(this, false);
 				nShots=0;
 			} else {
 				
@@ -79,7 +79,7 @@ public class BulletEnemy extends Enemy {
 				if(cellTarget != null) {
 					Bullet b = new Bullet();
 					b.source = this;
-					cellTarget.add(b);
+					cellTarget.add(b, true);
 				}
 				nShots++;
 			}

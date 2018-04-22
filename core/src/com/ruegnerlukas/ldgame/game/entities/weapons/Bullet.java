@@ -35,7 +35,7 @@ public class Bullet extends Entity {
 		cellDst = world.getCell(x+dir, y);
 		if(cellDst != null) {
 			world.getCell(x, y).removeNow(this);
-			cellDst.add(this);
+			cellDst.add(this, false);
 		}
 		
 		// handle collisions

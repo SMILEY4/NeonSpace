@@ -89,7 +89,7 @@ public class Player extends Entity {
 			Cell cellDst = world.getCell(x, y+1);
 			if(cellDst != null && canMoveTo(cellDst)) {
 				world.getCell(x, y).removeNow(this);
-				cellDst.add(this);
+				cellDst.add(this, false);
 				usedAction = true;
 			}
 		}
@@ -98,7 +98,7 @@ public class Player extends Entity {
 			Cell cellDst = world.getCell(x, y-1);
 			if(cellDst != null && canMoveTo(cellDst)) {
 				world.getCell(x, y).removeNow(this);
-				cellDst.add(this);
+				cellDst.add(this, false);
 				usedAction = true;
 			}
 		}
@@ -107,7 +107,7 @@ public class Player extends Entity {
 			Cell cellDst = world.getCell(x+1, y);
 			if(cellDst != null && canMoveTo(cellDst)) {
 				world.getCell(x, y).removeNow(this);
-				cellDst.add(this);
+				cellDst.add(this, false);
 				usedAction = true;
 			}
 		}
@@ -116,7 +116,7 @@ public class Player extends Entity {
 			Cell cellDst = world.getCell(x-1, y);
 			if(cellDst != null && canMoveTo(cellDst)) {
 				world.getCell(x, y).removeNow(this);
-				cellDst.add(this);
+				cellDst.add(this, false);
 				usedAction = true;
 			}
 		}
@@ -126,7 +126,7 @@ public class Player extends Entity {
 			if(cellTarget != null) {
 				Bullet b = new Bullet();
 				b.source = this;
-				cellTarget.add(b);
+				cellTarget.add(b, true);
 				usedAction = true;
 				power -= 2;
 			}
@@ -137,7 +137,7 @@ public class Player extends Entity {
 				Cell cellTarget = world.getCell(lx, y);
 				laser = new Laser(turnNum);
 				laser.source = this;
-				cellTarget.add(laser);
+				cellTarget.add(laser, true);
 			}
 			GameScene.particleMng.spawnLaser((x+1)*100+50, (world.getWidth()-(x+1))*100+50, y*100+50, 0, true, laser);
 			usedAction = true;
@@ -150,7 +150,7 @@ public class Player extends Entity {
 			if(cellTarget != null) {
 				Bomb b = new Bomb();
 				b.source = this;
-				cellTarget.add(b);
+				cellTarget.add(b, true);
 				usedAction = true;
 				this.bomb = b;
 			}

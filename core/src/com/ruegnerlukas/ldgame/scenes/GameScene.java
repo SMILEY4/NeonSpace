@@ -161,7 +161,9 @@ public class GameScene extends Scene {
 		}
 		
 		player = new Player();
-		world.getCell(1, 3).add(player);
+		world.getCell(1, 3).add(player, true);
+		GameScene.particleMng.spawnEnemySpawn(player.x*100+50, player.y*100+50, true);
+
 		
 		player.power=100;
 	}
@@ -211,7 +213,9 @@ public class GameScene extends Scene {
 			if(nEnemies == 0) {
 				if(waveCooldown <= 0) {
 					for(Enemy e : waveGenerator.getNext()) {
-						world.getCell(e.x, e.y).add(e);
+						world.getCell(e.x, e.y).add(e, true);
+						GameScene.particleMng.spawnEnemySpawn(e.x*100+50, e.y*100+50, false);
+
 					}
 					waveCooldown = 1000;
 				} else {
@@ -277,6 +281,19 @@ public class GameScene extends Scene {
 			}
 			
 			
+		}
+		
+		
+		// step animations
+		for(int x=0; x<cols; x++) {
+			for(int y=0; y<rows; y++) {
+				Cell cell = world.getCell(x, y);
+				for(int i=0; i<cell.getEntities().size(); i++) {
+					Entity e = cell.getEntities().get(i);
+					e.updateAnimation(deltaMS, world);
+				}
+				
+			}
 		}
 		
 		
@@ -380,23 +397,29 @@ public class GameScene extends Scene {
 				for(int i=0; i<cell.getEntities().size(); i++) {
 					Entity e = cell.getEntities().get(i);
 					
+					int ex = (int) e.pos.x;
+					int ey = (int) e.pos.y;
+
+//					int ex = x*cellSize;
+//					int ey = y*cellSize;
+					
 					batch.setColor(0f, 0f, 0f, 1f);
 					
 					if(e instanceof Player) {
 						batch.setColor(0f, 1f, 1f, 1f);
-						batch.draw(texPlayer, x*cellSize, y*cellSize, 100, 100);
+						batch.draw(texPlayer, ex, ey, 100, 100);
 					}
 					
 					if(e instanceof Enemy) {
 						batch.setColor(1f, 0f, 1f, 1f);
 						if(e instanceof CircleEnemy) {
-							batch.draw(texEnemyCircle, x*cellSize, y*cellSize, 100, 100);
+							batch.draw(texEnemyCircle, ex, ey, 100, 100);
 						}
 						if(e instanceof BulletEnemy) {
-							batch.draw(texEnemyBullet, x*cellSize, y*cellSize, 100, 100);
+							batch.draw(texEnemyBullet, ex, ey, 100, 100);
 						}
 						if(e instanceof LaserEnemy) {
-							batch.draw(texEnemyLaser, x*cellSize, y*cellSize, 100, 100);
+							batch.draw(texEnemyLaser, ex, ey, 100, 100);
 						}
 					}
 					
@@ -406,7 +429,7 @@ public class GameScene extends Scene {
 						} else {
 							batch.setColor(1f, 0f, 1f, 1f);
 						}
-						batch.draw(texBullet, x*cellSize, y*cellSize, 100, 100);
+						batch.draw(texBullet, ex, ey, 100, 100);
 					}
 					if(e instanceof Bomb) {
 						if( ((Bomb)e).source instanceof Player ) {
@@ -414,7 +437,7 @@ public class GameScene extends Scene {
 						} else {
 							batch.setColor(1f, 0f, 1f, 1f);
 						}
-						batch.draw(texBomb, x*cellSize, y*cellSize, 100, 100);
+						batch.draw(texBomb, ex, ey, 100, 100);
 					}
 					if(e instanceof Laser) {
 						
@@ -431,15 +454,15 @@ public class GameScene extends Scene {
 							} else {
 								batch.setColor(1f, 0f, 1f, 0.5f);
 							}
-							batch.draw(texLaser, x*cellSize, y*cellSize+45, 100, 10);
+							batch.draw(texLaser, ex, ey+45, 100, 10);
 						}
 						
 						if(state == 1) {
-							batch.draw(texLaser, x*cellSize, y*cellSize, 100, 100);
+							batch.draw(texLaser, ex, ey, 100, 100);
 						}
 						
 						if(state == 2) {
-							batch.draw(texLaser, x*cellSize, y*cellSize+30, 100, 40);	
+							batch.draw(texLaser, ex, ey+30, 100, 40);	
 						}
 
 					}

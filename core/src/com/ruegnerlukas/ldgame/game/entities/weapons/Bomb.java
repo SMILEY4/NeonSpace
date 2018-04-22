@@ -37,7 +37,7 @@ public class Bomb extends Entity {
 
 		if(cellDst != null) {
 			world.getCell(x, y).removeLater(this);
-			cellDst.add(this);
+			cellDst.add(this, false);
 		}
 		
 		// handle collisions

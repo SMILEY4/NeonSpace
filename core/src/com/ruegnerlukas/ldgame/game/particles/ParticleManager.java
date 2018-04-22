@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Laser;
+import com.ruegnerlukas.simplemath.vectors.vec2.Vector2f;
 
 public class ParticleManager {
 	
@@ -56,6 +57,13 @@ public class ParticleManager {
 	}
 	
 	
+	public void spawnEnemySpawn(int x, int y, boolean isPlayerColor) {
+		SpawnEffect e = new SpawnEffect(x, y, isPlayerColor);
+		effects.add(e);
+	}
+	
+	
+	
 	
 	public void update(int deltaMS) {
 
@@ -72,6 +80,8 @@ public class ParticleManager {
 		
 		renderer.begin(ShapeType.Filled);
 		
+		Vector2f tmp = new Vector2f();
+		
 		for(int i=0; i<particles.size(); i++) {
 			Particle p = particles.get(i);
 
@@ -81,8 +91,17 @@ public class ParticleManager {
 				renderer.rect(p.x, p.y, 1, 1);
 			}
 
-			p.x += p.dx;
-			p.y += p.dy;
+			if(p.isAttracted) {
+
+				Vector2f.setVectorAB(p.x, p.y, p.attX, p.attY, tmp);
+				tmp.setLength(p.dy);
+				p.x += tmp.x;
+				p.y += tmp.y;
+				
+			} else {
+				p.x += p.dx;
+				p.y += p.dy;
+			}
 			
 			if(p.timeTotal < System.currentTimeMillis()-p.timeStart) {
 				particles.remove(i);

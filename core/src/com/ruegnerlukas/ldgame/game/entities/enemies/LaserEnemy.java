@@ -82,7 +82,7 @@ public class LaserEnemy extends Enemy {
 				
 				if(cellDst != null && canMoveTo(cellDst)) {
 					world.getCell(x, y).removeNow(this);
-					cellDst.add(this);
+					cellDst.add(this, false);
 					nShots=0;
 				} else {
 					shoot(world, turnNum);
@@ -127,7 +127,7 @@ public class LaserEnemy extends Enemy {
 			Cell cellTarget = world.getCell(lx, y);
 			laser = new Laser(turnNum);
 			laser.source = this;
-			cellTarget.add(laser);
+			cellTarget.add(laser, true);
 		}
 		GameScene.particleMng.spawnLaser((x-1)*100+50, 50, y*100+50, 1, false, laser);
 
