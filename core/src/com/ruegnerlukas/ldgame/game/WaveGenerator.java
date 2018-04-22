@@ -4,27 +4,46 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.ruegnerlukas.ldgame.game.entities.enemies.BombEnemy;
 import com.ruegnerlukas.ldgame.game.entities.enemies.BulletEnemy;
 import com.ruegnerlukas.ldgame.game.entities.enemies.CircleEnemy;
 import com.ruegnerlukas.ldgame.game.entities.enemies.Enemy;
 import com.ruegnerlukas.ldgame.game.entities.enemies.LaserEnemy;
 
-import javafx.scene.media.EqualizerBand;
-
 public class WaveGenerator {
 
+	
+//	public static void main(String[] args) {
+//		
+//		for(int i=0; i<1; i++) {
+//			
+//			WaveGenerator gen = new WaveGenerator();
+//			
+//			for(int j=0; j<30; j++) {
+//				
+//				System.out.println();
+//				System.out.println();
+//				System.out.println("WAVE: " + j);
+//				
+//				List<Enemy> enemies = gen.getNext();
+//				for(Enemy e : enemies) {
+//					System.out.println(e);
+//				}
+//				
+//			}
+//			
+//		}
+//		
+//	}
+//	
+	
 	
 	private int currentWave = 1;
 	
 	
-	public WaveGenerator() {
-		
-	}
-	
-	
-	
 	
 	public List<Enemy> getNext() {
+		
 		
 		int points = (int) eq(currentWave);
 		List<Enemy> enemies = new ArrayList<Enemy>();
@@ -53,7 +72,7 @@ public class WaveGenerator {
 		
 		while(points > 0) {
 			
-			int pEnemy = random.nextInt(Math.max(points, 2))+1;
+			int pEnemy = random.nextInt(Math.min(points, 3))+1;
 			points -= pEnemy;
 			
 			if(pEnemy == 1) {
@@ -64,8 +83,16 @@ public class WaveGenerator {
 				}
 			}
 			
-			if(pEnemy == 2) {
+			boolean bomb = random.nextFloat() < 0.4f;
+			if(pEnemy == 2 && !bomb) {
 				BulletEnemy enemy = new BulletEnemy();
+				boolean placed = setPosition(enemies, enemy, random);
+				if(placed) {
+					enemies.add(enemy);
+				}
+			}
+			if(pEnemy == 2 && bomb) {
+				BombEnemy enemy = new BombEnemy();
 				boolean placed = setPosition(enemies, enemy, random);
 				if(placed) {
 					enemies.add(enemy);
@@ -107,7 +134,7 @@ public class WaveGenerator {
 					break;
 				}
 			}
-			if(placed || cnt>20) {
+			if(placed || cnt>60) {
 				break;
 			}
 		}
@@ -118,7 +145,7 @@ public class WaveGenerator {
 	
 
 	private float eq(float x) {
-		return (float) Math.pow((Math.log(x) + 1), 1.3f) + x*0.1f;
+		return (float) Math.pow((Math.log(x) + 1), 1.5f) + x*0.3f;
 	}
 	
 	

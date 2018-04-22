@@ -29,6 +29,28 @@ public class Bullet extends Entity {
 			currCell.removeNow(this);
 		}
 		
+		// handle first collisions
+		Cell cell0 = world.getCell(x, y);
+		
+		for(int i=0; i<cell0.getEntities().size(); i++) {
+			Entity e = cell0.getEntities().get(i);
+			
+			if(e instanceof Enemy && source instanceof Player) {
+				((Enemy)e).takeDamage(cell0, this, 1);
+				cell0.removeNow(this);
+			}
+			
+			if(e instanceof Player && !(source instanceof Player) ) {
+				((Player)e).takeDamage(cell0, this, 1);
+				cell0.removeNow(this);
+			}
+		}
+		
+		
+		if(!cell0.getEntities().contains(this)) {
+			return false;
+		}
+		
 		// move
 		Cell cellDst = null;
 		int dir = source instanceof Player ? +1 : -1;
@@ -39,19 +61,19 @@ public class Bullet extends Entity {
 		}
 		
 		// handle collisions
-		Cell cell = world.getCell(x, y);
+		Cell cell1 = world.getCell(x, y);
 		
-		for(int i=0; i<cell.getEntities().size(); i++) {
-			Entity e = cell.getEntities().get(i);
+		for(int i=0; i<cell1.getEntities().size(); i++) {
+			Entity e = cell1.getEntities().get(i);
 			
 			if(e instanceof Enemy && source instanceof Player) {
-				((Enemy)e).takeDamage(cell, this, 1);
-				cell.removeNow(this);
+				((Enemy)e).takeDamage(cell1, this, 1);
+				cell1.removeNow(this);
 			}
 			
 			if(e instanceof Player && !(source instanceof Player) ) {
-				((Player)e).takeDamage(cell, this, 1);
-				cell.removeNow(this);
+				((Player)e).takeDamage(cell1, this, 1);
+				cell1.removeNow(this);
 			}
 		}
 		

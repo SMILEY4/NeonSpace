@@ -25,7 +25,7 @@ public class StartScene extends Scene {
 
 	private ShapeRenderer shapeRenderer;
 	private SpriteBatch batch;
-	private BitmapFont font;
+	private BitmapFont font36, font12;
 	
 	private Texture texTitle, texGlow;
 	
@@ -45,8 +45,9 @@ public class StartScene extends Scene {
 	public void load() {
 		shapeRenderer = new ShapeRenderer();
 		batch = new SpriteBatch();
-		font = new BitmapFont(Gdx.files.internal("fonts/cornerstone36mod.fnt"));
-		
+		font36 = new BitmapFont(Gdx.files.internal("fonts/cornerstone36mod.fnt"));
+		font12 = new BitmapFont(Gdx.files.internal("fonts/cornerstone12.fnt"));
+
 		texTitle = new Texture(Gdx.files.internal("startSceneTitle.png"));
 		texGlow = new Texture(Gdx.files.internal("glow.png"));
 
@@ -104,7 +105,6 @@ public class StartScene extends Scene {
 		}
 		shapeRenderer.end();
 
-		
 		// draw text
 		if(loaded) {
 			
@@ -121,12 +121,14 @@ public class StartScene extends Scene {
 			color.z = colorA.z * (1f-tIpl) + colorB.z * (tIpl);
 			color.w = colorA.w * (1f-tIpl) + colorB.w * (tIpl);
 
-			
 			batch.enableBlending();
 			batch.begin();
 			
-			font.setColor(color.x, color.y, color.z, color.w);
-			font.draw(batch, "< Press any key to start >", 0, 150, Gdx.graphics.getWidth(), Align.center, false);
+			font36.setColor(color.x, color.y, color.z, color.w);
+			font36.draw(batch, "< Press any key to start >", 0, 150, Gdx.graphics.getWidth(), Align.center, false);
+			
+			font12.setColor(color.x, color.y, color.z, Math.min(color.w, 0.3f));
+			font12.draw(batch, "a game by Lukas R<gner (SMILEY>4>) for Ludum Dare 41 (2018)", 0, 20, Gdx.graphics.getWidth()-10, Align.right, false);
 			
 			Color colorOld = batch.getColor();
 			batch.setColor(1, 1, 1, color.w);
@@ -139,8 +141,7 @@ public class StartScene extends Scene {
 		}
 		
 		
-		
-		if(Gdx.input.isKeyJustPressed(-1) && loaded) {
+		if(Gdx.input.isKeyJustPressed(-1) && loaded && SceneManager.get().getTransitionState() != TransitionState.SCENE_OUT) {
 			SceneManager.get().changeScene("menu_scene",
 					new ColorFadeTransition(1000, new Vector4f(0,0,0,0f), new Vector4f(0,0,0,1f), new InterpolationSineOut()),
 					new ColorFadeTransition(1000, new Vector4f(0,0,0,1f), new Vector4f(0,0,0,0), new InterpolationSineIn())
@@ -161,7 +162,7 @@ public class StartScene extends Scene {
 		texGlow.dispose();
 		shapeRenderer.dispose();
 		batch.dispose();
-		font.dispose();
+		font36.dispose();
 	}
 
 }

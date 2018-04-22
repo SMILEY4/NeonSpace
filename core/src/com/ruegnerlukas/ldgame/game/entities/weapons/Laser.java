@@ -1,21 +1,18 @@
 package com.ruegnerlukas.ldgame.game.entities.weapons;
 
-import java.util.ListIterator;
-
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
 import com.ruegnerlukas.ldgame.game.entities.Player;
 import com.ruegnerlukas.ldgame.game.entities.enemies.Enemy;
-import com.ruegnerlukas.ldgame.scenes.GameScene;
 
 public class Laser extends Entity {
 	
 	public Entity source;
 	
-	private long startTurn = 0;
-	private int nTurns = 3;
-	private int state = 0;
+	public long startTurn = 0;
+	public int nTurns = 3;
+	public int state = 0;
 
 
 	public Laser(long startTurn) {
@@ -33,23 +30,21 @@ public class Laser extends Entity {
 	
 	@Override
 	public boolean update(long turnNum, int turnType, World world) {
+
 		if(turnType != 1) {
 			return false;
 		}
 		
 		// calc state
-		int turn = (int)(turnNum-startTurn);
-		if(turn == 1) {
-			state = 1;
-		}
-		if(turn == nTurns-1) {
-			state = 2;
-		}
-		
-		// remove
-		if(turn >= nTurns) {
+		if(state == 2) {
 			state = 4;
 			world.getCell(x, y).removeNow(this);
+		}
+		if(state == 1) {
+			state = 2;
+		}
+		if(state == 0) {
+			state = 1;
 		}
 		
 		// handle collisions

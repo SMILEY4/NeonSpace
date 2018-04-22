@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -34,8 +35,10 @@ public class MenuScene extends Scene {
 
 	private BitmapFont font36;
 	private BitmapFont font24;
+	private BitmapFont font12;
 
-	private Texture texGlow;
+
+	private Texture texTitle, texGlow;
 	
 	private InputManager input;
 	
@@ -58,7 +61,10 @@ public class MenuScene extends Scene {
 		batch = new SpriteBatch();
 		font36 = new BitmapFont(Gdx.files.internal("fonts/cornerstone36mod.fnt"));
 		font24 = new BitmapFont(Gdx.files.internal("fonts/cornerstone24.fnt"));
+		font12 = new BitmapFont(Gdx.files.internal("fonts/cornerstone12.fnt"));
 
+		
+		texTitle = new Texture(Gdx.files.internal("startSceneTitle.png"));
 		texGlow = new Texture(Gdx.files.internal("glow.png"));
 		
 		Random random = new Random();
@@ -151,36 +157,43 @@ public class MenuScene extends Scene {
 			// draw start
 			if(iSelected == 0) {
 				font36.setColor(colorSelection.x, colorSelection.y, colorSelection.z, colorSelection.w);
-				font36.draw(batch, "<START>", 0, Gdx.graphics.getHeight()-180, Gdx.graphics.getWidth(), Align.center, false);
+				font36.draw(batch, "< START >", 0, Gdx.graphics.getHeight()-280-60, Gdx.graphics.getWidth(), Align.center, false);
 			} else {
 				font36.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-				font36.draw(batch, "START", 0, Gdx.graphics.getHeight()-180, Gdx.graphics.getWidth(), Align.center, false);
+				font36.draw(batch, "START", 0, Gdx.graphics.getHeight()-280-60, Gdx.graphics.getWidth(), Align.center, false);
 			}
 
-			
 			// draw exit
 			if(iSelected == 1) {
 				font36.setColor(colorSelection.x, colorSelection.y, colorSelection.z, colorSelection.w);
-				font36.draw(batch, "<EXIT>", 0, Gdx.graphics.getHeight()-230, Gdx.graphics.getWidth(), Align.center, false);
+				font36.draw(batch, "< EXIT >", 0, Gdx.graphics.getHeight()-315-60, Gdx.graphics.getWidth(), Align.center, false);
 			} else {
 				font36.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-				font36.draw(batch, "EXIT", 0, Gdx.graphics.getHeight()-230, Gdx.graphics.getWidth(), Align.center, false);
+				font36.draw(batch, "EXIT", 0, Gdx.graphics.getHeight()-315-60, Gdx.graphics.getWidth(), Align.center, false);
 			}
 
 
 			// draw help
 			font36.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-			font36.draw(batch, "INFORMATION:", 100, Gdx.graphics.getHeight()-340, Gdx.graphics.getWidth()-100, Align.left, false);
+			font36.draw(batch, "INFORMATION:", 100, Gdx.graphics.getHeight()-340-80, Gdx.graphics.getWidth()-100, Align.left, false);
 			
 			font24.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-			font24.draw(batch, "Move your spaceship with WASD or arrow-keys.", 								120, Gdx.graphics.getHeight()-390, Gdx.graphics.getWidth()-100, Align.left, false);
-			font24.draw(batch, "Fire your gun with F. Drop a bomb with G and press G again to blow it up.", 120, Gdx.graphics.getHeight()-415, Gdx.graphics.getWidth()-100, Align.left, false);
-			font24.draw(batch, "Fire your gun with F.", 													120, Gdx.graphics.getHeight()-440, Gdx.graphics.getWidth()-100, Align.left, false);
-			font24.draw(batch, "Drop a bomb with G and press G again to blow it up.", 						120, Gdx.graphics.getHeight()-465, Gdx.graphics.getWidth()-100, Align.left, false);
-			font24.draw(batch, "Get as many points as possible by surviving the enemy waves.", 				120, Gdx.graphics.getHeight()-490, Gdx.graphics.getWidth()-100, Align.left, false);
-			font24.draw(batch, "Have fun !",																120, Gdx.graphics.getHeight()-530, Gdx.graphics.getWidth()-100, Align.left, false);
+			font24.draw(batch, "- Move your spaceship with WASD or arrow-keys.", 				120, Gdx.graphics.getHeight()-390-80, Gdx.graphics.getWidth()-100, Align.left, false);
+			font24.draw(batch, "- Fire your gun with F.",										120, Gdx.graphics.getHeight()-415-80, Gdx.graphics.getWidth()-100, Align.left, false);
+			font24.draw(batch, "- Drop a bomb with G and press G again to blow it up.", 		120, Gdx.graphics.getHeight()-440-80, Gdx.graphics.getWidth()-100, Align.left, false);
+			font24.draw(batch, "- Fire your laser-beam with H", 								120, Gdx.graphics.getHeight()-465-80, Gdx.graphics.getWidth()-100, Align.left, false);
+			font24.draw(batch, "- Your attacks use Energy. Energy refills each turn.", 			120, Gdx.graphics.getHeight()-490-80, Gdx.graphics.getWidth()-100, Align.left, false);
+			font24.draw(batch, "- Get as many points as possible by destroying enemies.", 		120, Gdx.graphics.getHeight()-515-80, Gdx.graphics.getWidth()-100, Align.left, false);
+			font24.draw(batch, "Have fun !",													120, Gdx.graphics.getHeight()-555-80, Gdx.graphics.getWidth()-100, Align.left, false);
 
+			font12.setColor(colorWhite.x, colorWhite.y, colorWhite.z, Math.min(colorWhite.w, 0.3f));
+			font12.draw(batch, "a game by Lukas R<gner (SMILEY>4>) for Ludum Dare 41 (2018)", 0, 20, Gdx.graphics.getWidth()-10, Align.right, false);
 			
+			
+			Color colorOld = batch.getColor();
+			batch.setColor(1, 1, 1, colorWhite.w);
+			batch.draw(texTitle, 0, 0);
+			batch.setColor(colorOld);
 			
 			batch.end();
 			batch.disableBlending();
@@ -190,7 +203,7 @@ public class MenuScene extends Scene {
 		}
 		
 		
-		if(isLoaded()) {
+		if(isLoaded() && SceneManager.get().getTransitionState() != TransitionState.SCENE_OUT) {
 			
 			if(input.action("up")) {
 				iSelected--;
@@ -229,6 +242,7 @@ public class MenuScene extends Scene {
 	@Override
 	public void unload() {
 		texGlow.dispose();
+		texTitle.dispose();
 		shapeRenderer.dispose();
 		batch.dispose();
 		font36.dispose();

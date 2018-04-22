@@ -20,7 +20,7 @@ public class MoveAnimation {
 	public MoveAnimation(Vector2f posStart, Vector2f posDst, int durMS) {
 		this.posStart = posStart;
 		this.posDst = posDst;
-		this.durMS = durMS;
+		this.durMS = 100;//durMS;
 		this.startMS = System.currentTimeMillis();
 		this.posCurr = new Vector2f(posStart);
 		this.interpolation = new InterpolationSine();

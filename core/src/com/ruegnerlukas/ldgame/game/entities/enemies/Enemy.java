@@ -8,12 +8,13 @@ import com.ruegnerlukas.ldgame.game.entities.weapons.Bomb;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Bullet;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Laser;
 import com.ruegnerlukas.ldgame.scenes.GameScene;
+import com.ruegnerlukas.simplemath.vectors.vec3.Vector3i;
 
 public abstract class Enemy extends Entity {
 	
 	
 	
-	
+	public boolean hasShield = true;
 	
 	
 	public boolean canMoveTo(Cell cell) {
@@ -65,13 +66,16 @@ public abstract class Enemy extends Entity {
 	
 	public boolean takeDamage(Cell cell, Entity src, int dmg) {
 		GameScene.particleMng.spawnHit(x*100+50, y*100+50, false, 0);
-		cell.removeNow(this);
-		if(src instanceof Bomb) {
-			cell.removeNow(src);
+		if(hasShield) {
+			hasShield = false;
+		} else {
+			cell.removeNow(this);
+			if(src instanceof Bomb) {
+				cell.removeNow(src);
+			}
+			GameScene.particleMng.spawnExplosionDeath(x*100+50, y*100+50, false);
+			GameScene.screenShake.add(new Vector3i(12, 5, 0));
 		}
-		GameScene.particleMng.spawnExplosionDeath(x*100+50, y*100+50, false);
-		GameScene.shakeFrames = Math.max(GameScene.shakeFrames, 5);
-		GameScene.shakeSize = Math.max(GameScene.shakeSize, 12);
 		return true;
 	}
 	

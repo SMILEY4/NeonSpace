@@ -71,7 +71,7 @@ public class SpawnEffect extends ParticleEffect {
 			p.isPlayerColor = isPlayerColor;
 			p.isBigChunk = random.nextFloat() < 0.2f;
 			p.timeStart = System.currentTimeMillis();
-			p.timeTotal = random.nextInt(1500)+100;
+			p.timeTotal = random.nextInt(1300)+100;
 			particles.add(p);
 		}
 	

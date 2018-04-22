@@ -33,7 +33,7 @@ public class GameOverScene extends Scene {
 	private SpriteBatch batch;
 	private BitmapFont font24, font36;
 	
-	private Texture texGlow;
+	private Texture texGlow, texGameOver;
 	
 	private InputManager input;
 	
@@ -60,6 +60,7 @@ public class GameOverScene extends Scene {
 		font36 = new BitmapFont(Gdx.files.internal("fonts/cornerstone36mod.fnt"));
 
 		texGlow = new Texture(Gdx.files.internal("glow.png"));
+		texGameOver = new Texture(Gdx.files.internal("gameOver.png"));
 
 		Random random = new Random();
 		
@@ -124,7 +125,7 @@ public class GameOverScene extends Scene {
 		
 		
 		// draw text
-		if(loaded) {
+		if(loaded && SceneManager.get().getTransitionState() != TransitionState.SCENE_OUT) {
 			
 			Vector4f colorA = new Vector4f(0f, 1f, 1f, 0f);
 			Vector4f colorB = new Vector4f(1f, 1f, 1f, 1f);
@@ -153,29 +154,30 @@ public class GameOverScene extends Scene {
 			batch.begin();
 			
 			font36.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-			font36.draw(batch, "Score: " + Player.score,0, Gdx.graphics.getHeight()-200, Gdx.graphics.getWidth(), Align.center, false);
+			font36.draw(batch, "Score: " + Player.score, 0, Gdx.graphics.getHeight()-400, Gdx.graphics.getWidth(), Align.center, false);
 
 			
 			if(iSelected == 0) {
 				font24.setColor(colorSelection.x, colorSelection.y, colorSelection.z, colorSelection.w);
-				font24.draw(batch, "<Retry>", 0, Gdx.graphics.getHeight()-260, Gdx.graphics.getWidth(), Align.center, false);
+				font24.draw(batch, "< Retry >", 0, Gdx.graphics.getHeight()-530, Gdx.graphics.getWidth(), Align.center, false);
 			} else {
 				font24.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-				font24.draw(batch, "Retry", 0, Gdx.graphics.getHeight()-260, Gdx.graphics.getWidth(), Align.center, false);
+				font24.draw(batch, "Retry", 0, Gdx.graphics.getHeight()-530, Gdx.graphics.getWidth(), Align.center, false);
 			}
 			
 			if(iSelected == 1) {
 				font24.setColor(colorSelection.x, colorSelection.y, colorSelection.z, colorSelection.w);
-				font24.draw(batch, "<Back to Main menu>", 0, Gdx.graphics.getHeight()-285, Gdx.graphics.getWidth(), Align.center, false);
+				font24.draw(batch, "< Return to Main menu >", 0, Gdx.graphics.getHeight()-555, Gdx.graphics.getWidth(), Align.center, false);
 			} else {
 				font24.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-				font24.draw(batch, "Back to Main menu", 0, Gdx.graphics.getHeight()-285, Gdx.graphics.getWidth(), Align.center, false);
+				font24.draw(batch, "Return to Main menu", 0, Gdx.graphics.getHeight()-555, Gdx.graphics.getWidth(), Align.center, false);
 			}
 			
-//			font24.setColor(color.x, color.y, color.z, color.w);
-//			font24.draw(batch, "Retry", 				0, Gdx.graphics.getHeight()-260, Gdx.graphics.getWidth(), Align.center, false);
-//			font24.draw(batch, "Back to Main menu", 	0, Gdx.graphics.getHeight()-285, Gdx.graphics.getWidth(), Align.center, false);
 
+			Color colorOld = batch.getColor();
+			batch.setColor(1, 1, 1, colorWhite.w);
+			batch.draw(texGameOver, 0, 0);
+			batch.setColor(colorOld);
 			
 			batch.end();
 			batch.disableBlending();
@@ -225,6 +227,7 @@ public class GameOverScene extends Scene {
 	@Override
 	public void unload() {
 		texGlow.dispose();
+		texGameOver.dispose();
 		shapeRenderer.dispose();
 		batch.dispose();
 		font36.dispose();

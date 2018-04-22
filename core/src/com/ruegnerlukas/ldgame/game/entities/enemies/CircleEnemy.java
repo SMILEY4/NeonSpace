@@ -46,6 +46,7 @@ public class CircleEnemy extends Enemy {
 				if( (((Bomb)e).source instanceof Player) ) {
 					takeDamage(cell, e, 1);
 					cell.getEntities().remove(e);
+					((Bomb) e).exists = false;
 				}
 			}
 			if(e instanceof Bullet) {
