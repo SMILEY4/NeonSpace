@@ -1,5 +1,6 @@
 package com.ruegnerlukas.ldgame.game.entities.weapons;
 
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
@@ -96,6 +97,8 @@ public class Bomb extends Entity {
 		Cell currentCell = world.getCell(x, y);
 		currentCell.removeNow(this);
 		this.exists = false;
+		
+		SoundManager.play("explosion");
 		
 		for(int cx=0; cx<world.getWidth(); cx++) {
 			for(int cy=0; cy<world.getHeight(); cy++) {

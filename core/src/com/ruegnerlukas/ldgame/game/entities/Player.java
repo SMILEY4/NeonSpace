@@ -9,6 +9,7 @@ import com.ruegnerlukas.input.InputManager.InputState;
 import com.ruegnerlukas.input.actions.MultiKeyAction;
 import com.ruegnerlukas.input.actions.InputAction.MultiMode;
 import com.ruegnerlukas.ldgame.GDXInputReciever;
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.enemies.BulletEnemy;
@@ -93,6 +94,7 @@ public class Player extends Entity {
 		if(input.action("moveUp") && !usedAction && laser == null) {
 			Cell cellDst = world.getCell(x, y+1);
 			if(cellDst != null && canMoveTo(cellDst)) {
+				SoundManager.play("move");
 				world.getCell(x, y).removeNow(this);
 				cellDst.add(this, false);
 				usedAction = true;
@@ -102,6 +104,7 @@ public class Player extends Entity {
 		if(input.action("moveDown") && !usedAction && laser == null) {
 			Cell cellDst = world.getCell(x, y-1);
 			if(cellDst != null && canMoveTo(cellDst)) {
+				SoundManager.play("move");
 				world.getCell(x, y).removeNow(this);
 				cellDst.add(this, false);
 				usedAction = true;
@@ -111,6 +114,7 @@ public class Player extends Entity {
 		if(input.action("moveRight") && !usedAction && laser == null) {
 			Cell cellDst = world.getCell(x+1, y);
 			if(cellDst != null && canMoveTo(cellDst)) {
+				SoundManager.play("move");
 				world.getCell(x, y).removeNow(this);
 				cellDst.add(this, false);
 				usedAction = true;
@@ -120,6 +124,7 @@ public class Player extends Entity {
 		if(input.action("moveLeft") && !usedAction && laser == null) {
 			Cell cellDst = world.getCell(x-1, y);
 			if(cellDst != null && canMoveTo(cellDst)) {
+				SoundManager.play("move");
 				world.getCell(x, y).removeNow(this);
 				cellDst.add(this, false);
 				usedAction = true;
@@ -135,8 +140,10 @@ public class Player extends Entity {
 					cellTarget.add(b, true);
 					usedAction = true;
 					power -= 2;
+					SoundManager.play("shootBullet");
 				}
 			} else {
+				SoundManager.play("error");
 				GameScene.errorMessage = "Not enough energy ("+power+"/2)";
 				GameScene.errorMsgTime = System.currentTimeMillis();
 			}
@@ -154,6 +161,7 @@ public class Player extends Entity {
 				usedAction = true;
 				power -= 15;
 			} else {
+				SoundManager.play("error");
 				GameScene.errorMessage = "Not enough energy ("+power+"/15)";
 				GameScene.errorMsgTime = System.currentTimeMillis();
 			}
@@ -169,9 +177,12 @@ public class Player extends Entity {
 					cellTarget.add(b, true);
 					usedAction = true;
 					this.bomb = b;
+					SoundManager.play("shootBomb");
+
 				}
 				power -= 8;
 			} else {
+				SoundManager.play("error");
 				GameScene.errorMessage = "Not enough energy ("+power+"/8)";
 				GameScene.errorMsgTime = System.currentTimeMillis();
 			}		
@@ -237,6 +248,7 @@ public class Player extends Entity {
 		GameScene.particleMng.spawnHit(x*100+50, y*100+50, true, 1);
 		GameScene.screenShake.add(new Vector3i(6, 2, 0));
 		
+		SoundManager.play("hit");
 		
 		if( (src instanceof CircleEnemy) || (src instanceof BulletEnemy) || (src instanceof LaserEnemy)) {
 			health -= 40;
@@ -253,6 +265,7 @@ public class Player extends Entity {
 		
 		health = Math.max(0, health);
 		if(health <= 0) {
+			SoundManager.play("explosion");
 			GameScene.particleMng.spawnExplosionDeath(x*100+50, y*100+50, true);
 			cell.removeNow(this);
 			GameScene.screenShake.add(new Vector3i(16, 10, 0));

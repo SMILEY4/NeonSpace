@@ -2,6 +2,7 @@ package com.ruegnerlukas.ldgame.game.entities.enemies;
 
 import java.util.Random;
 
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
@@ -46,6 +47,7 @@ public class BombEnemy extends Enemy {
 		}
 		
 		// blow up bomb
+		boolean blowUp = false;
 		if(bomb != null) {
 			
 			Player player = null;
@@ -72,6 +74,7 @@ public class BombEnemy extends Enemy {
 				if(d <= 1) {	
 					bomb.explode();
 					bomb = null;
+					blowUp = true;
 				}
 			}
 			
@@ -80,49 +83,56 @@ public class BombEnemy extends Enemy {
 		
 		
 		// do action
-		if(shoot) {
-			Cell cellTarget = world.getCell(x-1, y);
-			if(cellTarget != null) {
-				Bomb b = new Bomb();
-				b.source = this;
-				cellTarget.add(b, true);
-				nShots++;
-				this.bomb = b;
-			}
-			
-		} else {
-			
-			int dir = random.nextInt(4);
-			
-			Cell cellDst = null;
-			
-			if(dir == 0) {
-				cellDst = world.getCell(x-1, y);
-			}
-			if(dir == 1) {
-				cellDst = world.getCell(x+1, y);
-			}
-			if(dir == 2) {
-				cellDst = world.getCell(x, y-1);
-			}
-			if(dir == 3) {
-				cellDst = world.getCell(x, y+1);
-			}
-			
-			if(cellDst != null && canMoveTo(cellDst)) {
-				world.getCell(x, y).removeNow(this);
-				cellDst.add(this, false);
-				nShots=0;
-			} else {
-				
+		if(!blowUp) {
+			if(shoot) {
 				Cell cellTarget = world.getCell(x-1, y);
-				if(cellTarget != null && bomb != null) {
+				if(cellTarget != null) {
 					Bomb b = new Bomb();
 					b.source = this;
 					cellTarget.add(b, true);
+					nShots++;
 					this.bomb = b;
+					SoundManager.play("shootBomb");
 				}
-				nShots++;
+				
+			} else {
+				
+				int dir = random.nextInt(4);
+				
+				Cell cellDst = null;
+				
+				if(dir == 0) {
+					cellDst = world.getCell(x-1, y);
+				}
+				if(dir == 1) {
+					cellDst = world.getCell(x+1, y);
+				}
+				if(dir == 2) {
+					cellDst = world.getCell(x, y-1);
+				}
+				if(dir == 3) {
+					cellDst = world.getCell(x, y+1);
+				}
+				
+				if(cellDst != null && canMoveTo(cellDst)) {
+					world.getCell(x, y).removeNow(this);
+					cellDst.add(this, false);
+					nShots=0;
+					SoundManager.play("move");
+				} else {
+					
+					if(bomb != null && bomb.exists) {
+						Cell cellTarget = world.getCell(x-1, y);
+						if(cellTarget != null && bomb != null) {
+							Bomb b = new Bomb();
+							b.source = this;
+							cellTarget.add(b, true);
+							this.bomb = b;
+							SoundManager.play("shootBomb");
+						}
+						nShots++;
+					}
+				}
 			}
 		}
 		

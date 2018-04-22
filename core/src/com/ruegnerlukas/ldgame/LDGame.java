@@ -101,6 +101,8 @@ public class LDGame extends ApplicationAdapter {
 		ppShader = new ShaderProgram(vertexShader, fragmentShader);
 		
 		
+		SoundManager.create();
+		
 		SceneManager.get().addScene("start_scene", new StartScene());
 		SceneManager.get().addScene("menu_scene", new MenuScene());
 		SceneManager.get().addScene("game_scene", new GameScene());
@@ -139,6 +141,7 @@ public class LDGame extends ApplicationAdapter {
 	
 	@Override
 	public void dispose() {
+		SoundManager.dispose();
 		ppShader.dispose();
 		buffer.dispose();
 		batch.dispose();

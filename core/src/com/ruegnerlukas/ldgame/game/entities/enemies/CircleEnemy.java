@@ -1,5 +1,6 @@
 package com.ruegnerlukas.ldgame.game.entities.enemies;
 
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
@@ -33,6 +34,7 @@ public class CircleEnemy extends Enemy {
 		if(cellDst != null && canMoveTo(cellDst)) {
 			world.getCell(x, y).removeNow(this);
 			cellDst.add(this, false);
+			SoundManager.play("move");
 		}
 
 		

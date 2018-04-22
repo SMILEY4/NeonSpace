@@ -3,6 +3,7 @@ package com.ruegnerlukas.ldgame.scenes;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.Align;
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.scenes.Scene;
 import com.ruegnerlukas.scenes.SceneManager;
 import com.ruegnerlukas.scenes.SceneManager.TransitionState;
@@ -142,6 +144,7 @@ public class StartScene extends Scene {
 		
 		
 		if(Gdx.input.isKeyJustPressed(-1) && loaded && SceneManager.get().getTransitionState() != TransitionState.SCENE_OUT) {
+			SoundManager.play("menu_click_2");
 			SceneManager.get().changeScene("menu_scene",
 					new ColorFadeTransition(1000, new Vector4f(0,0,0,0f), new Vector4f(0,0,0,1f), new InterpolationSineOut()),
 					new ColorFadeTransition(1000, new Vector4f(0,0,0,1f), new Vector4f(0,0,0,0), new InterpolationSineIn())

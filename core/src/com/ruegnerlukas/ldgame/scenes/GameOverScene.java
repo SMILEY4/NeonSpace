@@ -16,6 +16,7 @@ import com.ruegnerlukas.input.InputManager.InputState;
 import com.ruegnerlukas.input.actions.MultiKeyAction;
 import com.ruegnerlukas.input.actions.InputAction.MultiMode;
 import com.ruegnerlukas.ldgame.GDXInputReciever;
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.entities.Player;
 import com.ruegnerlukas.scenes.Scene;
 import com.ruegnerlukas.scenes.SceneManager;
@@ -191,14 +192,17 @@ public class GameOverScene extends Scene {
 			if(input.action("up")) {
 				iSelected--;
 				if(iSelected<0) { iSelected = 1; };
+				SoundManager.play("menu_click_1");
 			}
 			
 			if(input.action("down")) {
 				iSelected++;
 				if(iSelected>=2) { iSelected = 0; };
+				SoundManager.play("menu_click_1");
 			}
 			
 			if(input.action("accept")) {
+				SoundManager.play("menu_click_2");
 				if(iSelected == 0) {
 					SceneManager.get().changeScene("game_scene",
 							new ColorFadeTransition(1000, new Vector4f(0,0,0,0f), new Vector4f(0,0,0,1f), new InterpolationSineOut()),

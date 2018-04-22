@@ -18,6 +18,7 @@ import com.ruegnerlukas.input.InputManager.InputState;
 import com.ruegnerlukas.input.actions.InputAction.MultiMode;
 import com.ruegnerlukas.input.actions.MultiKeyAction;
 import com.ruegnerlukas.ldgame.GDXInputReciever;
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.scenes.Scene;
 import com.ruegnerlukas.scenes.SceneManager;
 import com.ruegnerlukas.scenes.SceneManager.TransitionState;
@@ -154,28 +155,36 @@ public class MenuScene extends Scene {
 			batch.enableBlending();
 			batch.begin();
 			
-			// draw start
 			if(iSelected == 0) {
 				font36.setColor(colorSelection.x, colorSelection.y, colorSelection.z, colorSelection.w);
-				font36.draw(batch, "< START >", 0, Gdx.graphics.getHeight()-280-60, Gdx.graphics.getWidth(), Align.center, false);
+				font36.draw(batch, "< START >", 0, Gdx.graphics.getHeight()-280-60+25, Gdx.graphics.getWidth(), Align.center, false);
 			} else {
 				font36.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-				font36.draw(batch, "START", 0, Gdx.graphics.getHeight()-280-60, Gdx.graphics.getWidth(), Align.center, false);
+				font36.draw(batch, "START", 0, Gdx.graphics.getHeight()-280-60+25, Gdx.graphics.getWidth(), Align.center, false);
 			}
 
-			// draw exit
 			if(iSelected == 1) {
 				font36.setColor(colorSelection.x, colorSelection.y, colorSelection.z, colorSelection.w);
-				font36.draw(batch, "< EXIT >", 0, Gdx.graphics.getHeight()-315-60, Gdx.graphics.getWidth(), Align.center, false);
+				font36.draw(batch, "< SOUND: " + (SoundManager.enabled ? "ON" : "OFF") + " >", 0, Gdx.graphics.getHeight()-315-60+25, Gdx.graphics.getWidth(), Align.center, false);
 			} else {
 				font36.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-				font36.draw(batch, "EXIT", 0, Gdx.graphics.getHeight()-315-60, Gdx.graphics.getWidth(), Align.center, false);
+				font36.draw(batch, "SOUND: " + (SoundManager.enabled ? "ON" : "OFF"), 0, Gdx.graphics.getHeight()-315-60+25, Gdx.graphics.getWidth(), Align.center, false);
 			}
-
+			
+			if(iSelected == 2) {
+				font36.setColor(colorSelection.x, colorSelection.y, colorSelection.z, colorSelection.w);
+				font36.draw(batch, "< EXIT >", 0, Gdx.graphics.getHeight()-350-60+25, Gdx.graphics.getWidth(), Align.center, false);
+			} else {
+				font36.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
+				font36.draw(batch, "EXIT", 0, Gdx.graphics.getHeight()-350-60+25, Gdx.graphics.getWidth(), Align.center, false);
+			}
+			
+			
+			
 
 			// draw help
 			font36.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
-			font36.draw(batch, "INFORMATION:", 100, Gdx.graphics.getHeight()-340-80, Gdx.graphics.getWidth()-100, Align.left, false);
+			font36.draw(batch, "HOW TO PLAY:", 100, Gdx.graphics.getHeight()-340-80, Gdx.graphics.getWidth()-100, Align.left, false);
 			
 			font24.setColor(colorWhite.x, colorWhite.y, colorWhite.z, colorWhite.w);
 			font24.draw(batch, "- Move your spaceship with WASD or arrow-keys.", 				120, Gdx.graphics.getHeight()-390-80, Gdx.graphics.getWidth()-100, Align.left, false);
@@ -207,15 +216,18 @@ public class MenuScene extends Scene {
 			
 			if(input.action("up")) {
 				iSelected--;
-				if(iSelected<0) { iSelected = 1; };
+				if(iSelected<0) { iSelected = 2; };
+				SoundManager.play("menu_click_1");
 			}
 			
 			if(input.action("down")) {
 				iSelected++;
-				if(iSelected>=2) { iSelected = 0; };
+				if(iSelected>=3) { iSelected = 0; };
+				SoundManager.play("menu_click_1");
 			}
 			
 			if(input.action("accept")) {
+				SoundManager.play("menu_click_2");
 				if(iSelected == 0) {
 					SceneManager.get().changeScene("game_scene",
 							new ColorFadeTransition(1000, new Vector4f(0,0,0,0f), new Vector4f(0,0,0,1f), new InterpolationSineOut()),
@@ -223,6 +235,9 @@ public class MenuScene extends Scene {
 							);
 				}
 				if(iSelected == 1) {
+					SoundManager.enabled = !SoundManager.enabled;
+				}
+				if(iSelected == 2) {
 					SceneManager.get().changeScene("exit_scene",
 							new ColorFadeTransition(1000, new Vector4f(0,0,0,0f), new Vector4f(0,0,0,1f), new InterpolationSineOut()),
 							null

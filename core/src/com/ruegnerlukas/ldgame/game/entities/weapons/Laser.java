@@ -1,5 +1,6 @@
 package com.ruegnerlukas.ldgame.game.entities.weapons;
 
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
@@ -44,6 +45,7 @@ public class Laser extends Entity {
 			state = 2;
 		}
 		if(state == 0) {
+			SoundManager.play("shootLaser");
 			state = 1;
 		}
 		

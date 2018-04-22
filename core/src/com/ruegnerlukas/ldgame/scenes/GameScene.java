@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.Align;
 import com.ruegnerlukas.input.InputManager;
 import com.ruegnerlukas.ldgame.GDXInputReciever;
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.WaveGenerator;
 import com.ruegnerlukas.ldgame.game.World;
@@ -173,7 +174,8 @@ public class GameScene extends Scene {
 		player = new Player();
 		world.getCell(1, 3).add(player, true);
 		GameScene.particleMng.spawnEnemySpawn(player.x*100+50, player.y*100+50, true);
-
+		SoundManager.play("spawn");
+		
 	}
 
 	
@@ -209,7 +211,7 @@ public class GameScene extends Scene {
 					for(Enemy e : waveGenerator.getNext()) {
 						world.getCell(e.x, e.y).add(e, true);
 						GameScene.particleMng.spawnEnemySpawn(e.x*100+50, e.y*100+50, false);
-
+						SoundManager.play("spawn");
 					}
 					waveCooldown = 1000;
 					enemyCooldown = 1500;

@@ -2,6 +2,7 @@ package com.ruegnerlukas.ldgame.game.entities.enemies;
 
 import java.util.Random;
 
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
@@ -84,6 +85,7 @@ public class LaserEnemy extends Enemy {
 					world.getCell(x, y).removeNow(this);
 					cellDst.add(this, false);
 					nShots=0;
+					SoundManager.play("move");
 				} else {
 					shoot(world, turnNum);
 				}

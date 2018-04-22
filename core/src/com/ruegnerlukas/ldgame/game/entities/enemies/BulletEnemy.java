@@ -2,6 +2,7 @@ package com.ruegnerlukas.ldgame.game.entities.enemies;
 
 import java.util.Random;
 
+import com.ruegnerlukas.ldgame.SoundManager;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
@@ -48,6 +49,7 @@ public class BulletEnemy extends Enemy {
 				b.source = this;
 				cellTarget.add(b, true);
 				nShots++;
+				SoundManager.play("shootBullet");
 			}
 			
 		} else {
@@ -73,6 +75,7 @@ public class BulletEnemy extends Enemy {
 				world.getCell(x, y).removeNow(this);
 				cellDst.add(this, false);
 				nShots=0;
+				SoundManager.play("move");
 			} else {
 				
 				Cell cellTarget = world.getCell(x-1, y);
@@ -80,6 +83,7 @@ public class BulletEnemy extends Enemy {
 					Bullet b = new Bullet();
 					b.source = this;
 					cellTarget.add(b, true);
+					SoundManager.play("shootBullet");
 				}
 				nShots++;
 			}

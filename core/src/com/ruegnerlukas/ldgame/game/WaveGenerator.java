@@ -71,12 +71,15 @@ public class WaveGenerator {
 		
 		
 		while(points > 0) {
+
+			boolean hasShield = random.nextFloat() < 0.3f && currentWave > 5;
 			
-			int pEnemy = random.nextInt(Math.min(points, 3))+1;
+			int pEnemy = random.nextInt(Math.min(points, 3))+1 + (hasShield?1:0);
 			points -= pEnemy;
 			
 			if(pEnemy == 1) {
 				CircleEnemy enemy = new CircleEnemy();
+				enemy.hasShield = hasShield;
 				boolean placed = setPosition(enemies, enemy, random);
 				if(placed) {
 					enemies.add(enemy);
@@ -86,6 +89,7 @@ public class WaveGenerator {
 			boolean bomb = random.nextFloat() < 0.4f;
 			if(pEnemy == 2 && !bomb) {
 				BulletEnemy enemy = new BulletEnemy();
+				enemy.hasShield = hasShield;
 				boolean placed = setPosition(enemies, enemy, random);
 				if(placed) {
 					enemies.add(enemy);
@@ -93,6 +97,7 @@ public class WaveGenerator {
 			}
 			if(pEnemy == 2 && bomb) {
 				BombEnemy enemy = new BombEnemy();
+				enemy.hasShield = hasShield;
 				boolean placed = setPosition(enemies, enemy, random);
 				if(placed) {
 					enemies.add(enemy);
@@ -101,6 +106,7 @@ public class WaveGenerator {
 			
 			if(pEnemy == 3) {
 				LaserEnemy enemy = new LaserEnemy();
+				enemy.hasShield = hasShield;
 				boolean placed = setPosition(enemies, enemy, random);
 				if(placed) {
 					enemies.add(enemy);
@@ -145,7 +151,7 @@ public class WaveGenerator {
 	
 
 	private float eq(float x) {
-		return (float) Math.pow((Math.log(x) + 1), 1.5f) + x*0.3f;
+		return (float) Math.pow((Math.log(x) + 1), 1.6f) + x*0.4f;
 	}
 	
 	
