@@ -7,6 +7,7 @@ import com.ruegnerlukas.ldgame.game.entities.Player;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Bomb;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Bullet;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Laser;
+import com.ruegnerlukas.ldgame.scenes.GameScene;
 
 public abstract class Enemy extends Entity {
 	
@@ -31,7 +32,7 @@ public abstract class Enemy extends Entity {
 				Bullet b = (Bullet)e;
 				if(b.source instanceof Player) {
 					takeDamage(to, b, 1);
-					to.remove(b);
+					to.removeLater(b);
 					return;
 				}
 			}
@@ -52,7 +53,7 @@ public abstract class Enemy extends Entity {
 				}
 			}
 			if(e instanceof Player) {
-				((Player)e).takeDamage(this, 1);
+				((Player)e).takeDamage(to, this, 1);
 				if(takeDamage(to, e, 1)) {
 					return;
 				}
@@ -63,11 +64,14 @@ public abstract class Enemy extends Entity {
 	
 	
 	public boolean takeDamage(Cell cell, Entity src, int dmg) {
-		cell.remove(this);
+		GameScene.particleMng.spawnHit(x*100+50, y*100+50, false, 0);
+		cell.removeNow(this);
 		if(src instanceof Bomb) {
-			cell.remove(src);
+			cell.removeNow(src);
 		}
-		System.out.println("Enemy took " + dmg + " damage from " + src);
+		GameScene.particleMng.spawnExplosionDeath(x*100+50, y*100+50, false);
+		GameScene.shakeFrames = Math.max(GameScene.shakeFrames, 5);
+		GameScene.shakeSize = Math.max(GameScene.shakeSize, 12);
 		return true;
 	}
 	

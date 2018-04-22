@@ -20,12 +20,13 @@ public class LDGame extends ApplicationAdapter {
 		SceneManager.get().addScene("menu_scene", new MenuScene());
 		SceneManager.get().addScene("game_scene", new GameScene());
 		SceneManager.get().addScene("gameover_scene", new GameOverScene());
+		SceneManager.get().addScene("exit_scene", new ExitScene());
+
+		SceneManager.get().changeScene("game_scene", null, new ColorFadeTransition(2000, new Vector4f(0,0,0,1f), new Vector4f(0,0,0,0), new InterpolationSineIn()));
+
 		SceneManager.get().addScene("overlay_scene", new OverlayScene());
-		
 		SceneManager.get().setStaticScene("overlay_scene");
-//		SceneManager.get().changeScene("start_scene", null, new ColorFadeTransition(2000, new Vector4f(0,0,0,1f), new Vector4f(0,0,0,0), new InterpolationSineIn()));
 		
-		SceneManager.get().changeScene("game_scene", null, null);
 
 	}
 

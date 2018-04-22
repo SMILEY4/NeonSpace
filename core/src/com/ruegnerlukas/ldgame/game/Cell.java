@@ -60,7 +60,14 @@ public class Cell {
 	
 	
 	
-	public void remove(Entity e) {
+	public void removeNow(Entity e) {
+		entities.remove(e);
+	} 
+	
+	
+	
+	
+	public void removeLater(Entity e) {
 		toRemove.add(e);
 	} 
 	

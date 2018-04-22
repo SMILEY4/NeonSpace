@@ -1,6 +1,9 @@
 package com.ruegnerlukas.ldgame.game.entities;
 
+import java.util.ListIterator;
+
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.math.Circle;
 import com.ruegnerlukas.input.InputManager;
 import com.ruegnerlukas.input.InputManager.InputState;
 import com.ruegnerlukas.input.actions.MultiKeyAction;
@@ -8,18 +11,22 @@ import com.ruegnerlukas.input.actions.InputAction.MultiMode;
 import com.ruegnerlukas.ldgame.GDXInputReciever;
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
+import com.ruegnerlukas.ldgame.game.entities.enemies.BulletEnemy;
+import com.ruegnerlukas.ldgame.game.entities.enemies.CircleEnemy;
 import com.ruegnerlukas.ldgame.game.entities.enemies.Enemy;
+import com.ruegnerlukas.ldgame.game.entities.enemies.LaserEnemy;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Bomb;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Bullet;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Laser;
+import com.ruegnerlukas.ldgame.scenes.GameScene;
 
 public class Player extends Entity {
 	
 	private InputManager input;
 	
+	public static int score = 0;
 	public int health = 100;
-	public int power = 50;
-	public int score = 1024;
+	public int power = 5;
 	
 	private long lastTurn = 0;
 	
@@ -30,6 +37,7 @@ public class Player extends Entity {
 	
 	
 	public Player() {
+		score = 0;
 		input = new InputManager();
 		input.setReciever(new GDXInputReciever());
 		input.addAction(new MultiKeyAction("moveUp", InputState.RELEASED, new int[]{Keys.W,Keys.UP}, MultiMode.ONE));
@@ -37,8 +45,9 @@ public class Player extends Entity {
 		input.addAction(new MultiKeyAction("moveLeft", InputState.RELEASED, new int[]{Keys.A,Keys.LEFT}, MultiMode.ONE));
 		input.addAction(new MultiKeyAction("moveRight", InputState.RELEASED, new int[]{Keys.D,Keys.RIGHT}, MultiMode.ONE));
 		input.addAction(new MultiKeyAction("shootBullet", InputState.RELEASED, new int[]{Keys.F}, MultiMode.ONE));
-		input.addAction(new MultiKeyAction("shootLaser", InputState.RELEASED, new int[]{Keys.G}, MultiMode.ONE));
-		input.addAction(new MultiKeyAction("shootBomb", InputState.RELEASED, new int[]{Keys.H}, MultiMode.ONE));
+		input.addAction(new MultiKeyAction("shootBomb", InputState.RELEASED, new int[]{Keys.G}, MultiMode.ONE));
+		input.addAction(new MultiKeyAction("shootLaser", InputState.RELEASED, new int[]{Keys.H}, MultiMode.ONE));
+		input.addAction(new MultiKeyAction("nothing", InputState.RELEASED, new int[]{Keys.SPACE}, MultiMode.ONE));
 
 	}
 
@@ -47,23 +56,23 @@ public class Player extends Entity {
 	
 	@Override
 	public boolean update(long turnNum, int turnType, World world) {
-	
+		if(turnType != 0) {
+			return false;
+		}
+		
+		// replenish power
 		if(turnNum != lastTurn) {
 			power = Math.max(0, Math.min(100, power+1));
 			lastTurn = turnNum;
 		}
 		
-		Cell currCell = world.getCell(x, y);
-		
-		onMove(currCell, currCell);
-		
 		boolean usedAction = false;
 
 		
+		// handle bomb, laser
 		if(bomb != null && !bomb.exists) {
 			bomb = null;
 		}
-		
 		if(laser != null && laser.getState()==4) {
 			laser = null;
 		}
@@ -71,13 +80,16 @@ public class Player extends Entity {
 			usedAction = true;
 		}
 		
+		// handle input
+		if(input.action("nothing") && !usedAction && laser == null) {
+			usedAction = true;
+		}
 		
 		if(input.action("moveUp") && !usedAction && laser == null) {
 			Cell cellDst = world.getCell(x, y+1);
 			if(cellDst != null && canMoveTo(cellDst)) {
-				world.getCell(x, y).remove(this);
+				world.getCell(x, y).removeNow(this);
 				cellDst.add(this);
-				onMove(currCell, cellDst);
 				usedAction = true;
 			}
 		}
@@ -85,19 +97,8 @@ public class Player extends Entity {
 		if(input.action("moveDown") && !usedAction && laser == null) {
 			Cell cellDst = world.getCell(x, y-1);
 			if(cellDst != null && canMoveTo(cellDst)) {
-				world.getCell(x, y).remove(this);
+				world.getCell(x, y).removeNow(this);
 				cellDst.add(this);
-				onMove(currCell, cellDst);
-				usedAction = true;
-			}
-		}
-		
-		if(input.action("moveLeft") && !usedAction && laser == null) {
-			Cell cellDst = world.getCell(x-1, y);
-			if(cellDst != null && canMoveTo(cellDst)) {
-				world.getCell(x, y).remove(this);
-				cellDst.add(this);
-				onMove(currCell, cellDst);
 				usedAction = true;
 			}
 		}
@@ -105,34 +106,46 @@ public class Player extends Entity {
 		if(input.action("moveRight") && !usedAction && laser == null) {
 			Cell cellDst = world.getCell(x+1, y);
 			if(cellDst != null && canMoveTo(cellDst)) {
-				world.getCell(x, y).remove(this);
+				world.getCell(x, y).removeNow(this);
 				cellDst.add(this);
-				onMove(currCell, cellDst);
 				usedAction = true;
 			}
 		}
 		
-		if(input.action("shootBullet") && !usedAction && bomb==null && laser == null) {
+		if(input.action("moveLeft") && !usedAction && laser == null) {
+			Cell cellDst = world.getCell(x-1, y);
+			if(cellDst != null && canMoveTo(cellDst)) {
+				world.getCell(x, y).removeNow(this);
+				cellDst.add(this);
+				usedAction = true;
+			}
+		}
+		
+		if(input.action("shootBullet") && !usedAction && bomb==null && laser == null && power >= 2) {
 			Cell cellTarget = world.getCell(x+1, y);
 			if(cellTarget != null) {
 				Bullet b = new Bullet();
 				b.source = this;
 				cellTarget.add(b);
 				usedAction = true;
+				power -= 2;
 			}
 		}
 		
-		if(input.action("shootLaser") && !usedAction && bomb==null && laser == null) {
+		if(input.action("shootLaser") && !usedAction && bomb==null && laser == null && power >= 20) {
 			for(int lx = this.x+1; lx<world.getWidth(); lx++) {
 				Cell cellTarget = world.getCell(lx, y);
 				laser = new Laser(turnNum);
 				laser.source = this;
 				cellTarget.add(laser);
 			}
+			GameScene.particleMng.spawnLaser((x+1)*100+50, (world.getWidth()-(x+1))*100+50, y*100+50, 0, true, laser);
 			usedAction = true;
+			power -= 10;
+			
 		}
 		
-		if(input.action("shootBomb") && !usedAction && bomb==null && laser == null) {
+		if(input.action("shootBomb") && !usedAction && bomb==null && laser == null && power >= 15) {
 			Cell cellTarget = world.getCell(x+1, y);
 			if(cellTarget != null) {
 				Bomb b = new Bomb();
@@ -141,7 +154,9 @@ public class Player extends Entity {
 				usedAction = true;
 				this.bomb = b;
 			}
+			power -= 8;
 		}
+		
 		if(input.action("shootBomb") && !usedAction && bomb!=null && laser == null) {
 			bomb.explode();
 			bomb = null;
@@ -149,8 +164,41 @@ public class Player extends Entity {
 		}
 		
 		
-		input.update();
 		
+		// handle collisions
+		Cell cell = world.getCell(x, y);
+
+		for(int i=0; i<cell.getEntities().size(); i++) {
+			Entity e = cell.getEntities().get(i);
+			
+			if(e instanceof Enemy) {
+				takeDamage(cell, e, 1);
+				((Enemy) e).takeDamage(cell, this, 1);
+				cell.getEntities().remove(e);
+			}
+			if(e instanceof Bomb) {
+				if( !(((Bomb)e).source instanceof Player) ) {
+					takeDamage(cell, e, 1);
+					cell.getEntities().remove(e);
+				}
+			}
+			if(e instanceof Bullet) {
+				if( !(((Bullet)e).source instanceof Player) ) {
+					takeDamage(cell, e, 1);
+					cell.getEntities().remove(e);
+				}
+			}
+			if(e instanceof Laser) {
+				if( !(((Laser)e).source instanceof Player) && (((Laser)e).getState()==2 || ((Laser)e).getState()==1) ) {
+//					takeDamage(cell, e, 1);
+				}
+			}
+		}
+		
+		// update input
+		input.update();
+
+		// return true, if player ended turn
 		return usedAction;
 	}
 	
@@ -164,33 +212,35 @@ public class Player extends Entity {
 	
 	
 	
-	public void onMove(Cell from, Cell to) {
-		for(Entity e : to.getEntities()) {
-			if(e instanceof Bullet) {
-				Bullet b = (Bullet)e;
-				if( !(b.source instanceof Player)) {
-					takeDamage(b, 1);
-				}
-				to.remove(b);
-			}
-			if(e instanceof Laser) {
-				Laser l = (Laser)e;
-				if( !(l.source instanceof Player) && l.getState()==1) {
-					takeDamage(l, 1);
-				}
-			}
-			if(e instanceof Enemy) {
-				takeDamage(e, 1);
-				((Enemy)e).takeDamage(to, this, 1);
-			}
+	public void takeDamage(Cell cell, Entity src, int dmg) {
+		
+		GameScene.particleMng.spawnHit(x*100+50, y*100+50, true, 1);
+		GameScene.shakeFrames = Math.max(GameScene.shakeFrames, 2);
+		GameScene.shakeSize = Math.max(GameScene.shakeSize, 6);
+
+
+		
+		if( (src instanceof CircleEnemy) || (src instanceof BulletEnemy) || (src instanceof LaserEnemy)) {
+			health -= 40;
 		}
-	}
-	
-	
-	
-	
-	public void takeDamage(Entity src, int dmg) {
-		health = Math.max(0, health-100);
+		if( (src instanceof Bullet) ) {
+			health -= 30;
+		}
+		if( (src instanceof Bomb) ) {
+			health -= 40;
+		}
+		if( (src instanceof Laser) ) {
+			health -= 90;
+		}
+		
+		health = Math.max(0, health);
+		if(health <= 0) {
+			GameScene.particleMng.spawnExplosionDeath(x*100+50, y*100+50, true);
+			cell.removeNow(this);
+			GameScene.shakeFrames = Math.max(GameScene.shakeFrames, 10);
+			GameScene.shakeSize = Math.max(GameScene.shakeSize, 16);
+
+		}
 	}
 	
 	

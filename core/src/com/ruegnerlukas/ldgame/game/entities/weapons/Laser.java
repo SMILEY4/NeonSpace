@@ -1,8 +1,13 @@
 package com.ruegnerlukas.ldgame.game.entities.weapons;
 
+import java.util.ListIterator;
+
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
+import com.ruegnerlukas.ldgame.game.entities.Player;
+import com.ruegnerlukas.ldgame.game.entities.enemies.Enemy;
+import com.ruegnerlukas.ldgame.scenes.GameScene;
 
 public class Laser extends Entity {
 	
@@ -32,10 +37,8 @@ public class Laser extends Entity {
 			return false;
 		}
 		
-		
-		
+		// calc state
 		int turn = (int)(turnNum-startTurn);
-		
 		if(turn == 1) {
 			state = 1;
 		}
@@ -43,18 +46,36 @@ public class Laser extends Entity {
 			state = 2;
 		}
 		
+		// remove
 		if(turn >= nTurns) {
-			Cell currCell = world.getCell(x, y);
-			currCell.remove(this);
 			state = 4;
+			world.getCell(x, y).removeNow(this);
 		}
 		
+		// handle collisions
+		Cell cell = world.getCell(x, y);
+
+		for(int i=0; i<cell.getEntities().size(); i++) {
+			Entity e = cell.getEntities().get(i);
+			
+			if(e instanceof Enemy && source instanceof Player && (state==1 || state==2)) {
+				((Enemy)e).takeDamage(cell, this, 1);
+			}
+			
+			if(e instanceof Player && !(source instanceof Player) && (state==1 || state==2)) {
+				((Player)e).takeDamage(cell, this, 1);
+			}
+		}
 		
-		
-		return true;
+		return false;
 	}
 	
 	
+	
+	@Override
+	public String toString() {
+		return super.toString() + "  state=" + this.state; 
+	}
 	
 	
 	

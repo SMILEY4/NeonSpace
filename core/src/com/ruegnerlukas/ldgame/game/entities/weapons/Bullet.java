@@ -1,5 +1,7 @@
 package com.ruegnerlukas.ldgame.game.entities.weapons;
 
+import java.util.ListIterator;
+
 import com.ruegnerlukas.ldgame.game.Cell;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
@@ -22,49 +24,40 @@ public class Bullet extends Entity {
 		
 		Cell currCell = world.getCell(x, y);
 		
+		// out of bounds 
 		if(x == 0 || x == world.getWidth()-1) {
-			currCell.remove(this);
+			currCell.removeNow(this);
 		}
 		
+		// move
 		Cell cellDst = null;
 		int dir = source instanceof Player ? +1 : -1;
 		cellDst = world.getCell(x+dir, y);
-
 		if(cellDst != null) {
-			world.getCell(x, y).remove(this);
+			world.getCell(x, y).removeNow(this);
 			cellDst.add(this);
-			onMove(currCell, cellDst);
 		}
 		
-		return true;
-	}
-	
-	
-	
-	
-	
-	
-	public void onMove(Cell from, Cell to) {
-		for(Entity e : to.getEntities()) {
+		// handle collisions
+		Cell cell = world.getCell(x, y);
+		
+		for(int i=0; i<cell.getEntities().size(); i++) {
+			Entity e = cell.getEntities().get(i);
 			
-			if(source instanceof Player) {
-				if(e instanceof Enemy) {
-					((Enemy)e).takeDamage(to, this, 1);
-					to.remove(this);
-				}
+			if(e instanceof Enemy && source instanceof Player) {
+				((Enemy)e).takeDamage(cell, this, 1);
+				cell.removeNow(this);
 			}
 			
-			if(!(source instanceof Player)) {
-				if(e instanceof Player) {
-					((Player)e).takeDamage(this, 1);
-					to.remove(this);
-				}
+			if(e instanceof Player && !(source instanceof Player) ) {
+				((Player)e).takeDamage(cell, this, 1);
+				cell.removeNow(this);
 			}
-			
 		}
+		
+		
+		return false;
 	}
-	
-	
 	
 	
 	

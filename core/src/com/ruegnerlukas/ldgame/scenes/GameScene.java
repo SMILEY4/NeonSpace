@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -16,6 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.ruegnerlukas.input.InputManager;
 import com.ruegnerlukas.ldgame.GDXInputReciever;
 import com.ruegnerlukas.ldgame.game.Cell;
+import com.ruegnerlukas.ldgame.game.WaveGenerator;
 import com.ruegnerlukas.ldgame.game.World;
 import com.ruegnerlukas.ldgame.game.entities.Entity;
 import com.ruegnerlukas.ldgame.game.entities.Player;
@@ -26,6 +26,7 @@ import com.ruegnerlukas.ldgame.game.entities.enemies.LaserEnemy;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Bomb;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Bullet;
 import com.ruegnerlukas.ldgame.game.entities.weapons.Laser;
+import com.ruegnerlukas.ldgame.game.particles.ParticleManager;
 import com.ruegnerlukas.scenes.Scene;
 import com.ruegnerlukas.scenes.SceneManager;
 import com.ruegnerlukas.scenes.SceneManager.TransitionState;
@@ -43,7 +44,7 @@ public class GameScene extends Scene {
 	
 	private ShaderProgram defaultShader, lightenShader;
 	
-	private Texture textureObjects, textureItems;
+	private Texture texGlow, textureObjects, textureItems;
 	private TextureRegion texPlayer, texEnemyCircle, texEnemyLaser, texEnemyBullet, texBullet, texLaser, texBomb;
 	
 	private final int N_STARS = 800;
@@ -52,6 +53,9 @@ public class GameScene extends Scene {
 	private Vector3f[] stars;
 	
 	private InputManager input;
+
+	private WaveGenerator waveGenerator;
+	private int waveCooldown = 0;
 	
 	private final int cellSize = 100;
 	private final int cols = 12;
@@ -68,11 +72,25 @@ public class GameScene extends Scene {
 	private long tick = 0;
 	private long turn = 0;
 	
+	public static ParticleManager particleMng;
+	
+	public static int shakeFrames = 0;
+	public static int shakeSize = 0;
+
+	
 	
 	
 	
 	@Override
 	public void load() {
+		
+		tick = 0;
+		turn = 0;
+		turnType = 0;
+		turnPause = turnPauseDur;
+		waveCooldown = 0;
+		
+		particleMng = new ParticleManager();
 		
 		shapeRenderer = new ShapeRenderer();
 		
@@ -113,6 +131,8 @@ public class GameScene extends Scene {
 		font.setUseIntegerPositions(true);
 		font.setOwnsTexture(true);
 		
+		texGlow = new Texture(Gdx.files.internal("glow.png"));
+
 		textureItems = new Texture(Gdx.files.internal("items.png"));
 		textureObjects = new Texture(Gdx.files.internal("objects/objects.png"));
 		texPlayer = new TextureRegion(textureObjects, 0, 0, 100, 100);
@@ -126,6 +146,8 @@ public class GameScene extends Scene {
 		input = new InputManager();
 		input.setReciever(new GDXInputReciever());
 
+		waveGenerator = new WaveGenerator();
+		
 		world = new World(cols, rows, cellSize);
 		
 		Random random = new Random();
@@ -139,14 +161,9 @@ public class GameScene extends Scene {
 		}
 		
 		player = new Player();
-		
 		world.getCell(1, 3).add(player);
-		world.getCell(random.nextInt(5)+6, random.nextInt(3)+0).add(new CircleEnemy());
-		world.getCell(random.nextInt(5)+6, random.nextInt(3)+3).add(new CircleEnemy());
-		world.getCell(random.nextInt(5)+6, random.nextInt(3)+3).add(new BulletEnemy());
-		world.getCell(random.nextInt(5)+6, random.nextInt(3)+3).add(new LaserEnemy());
-
 		
+		player.power=100;
 	}
 
 	
@@ -155,15 +172,53 @@ public class GameScene extends Scene {
 	@Override
 	public void update(int deltaMS) {
 		
+//		if(Gdx.input.justTouched()) {
+//			int mx = Gdx.input.getX();
+//			int my = Gdx.graphics.getHeight()-Gdx.input.getY();
+//			int cx = mx / 100;
+//			int cy = my / 100;
+//			Cell cell = world.getCell(cx, cy);
+//			if(cell != null) {
+//				System.out.println("CELL (" + cx + "," + cy +"):");
+//				for(Entity e : cell.getEntities()) {
+//					System.out.println("  " + e);
+//				}
+//			}
+//		}
+		
 		// game over
 		if(player.health <= 0 && SceneManager.get().getTransitionState() == TransitionState.NO_TRANSITION) {
-			SceneManager.get().changeScene("menu_scene",
-					new ColorFadeTransition(4000, new Vector4f(1,0,0,0f), new Vector4f(0,0,0,1f), new InterpolationSineOut()),
+			SceneManager.get().changeScene("gameover_scene",
+					new ColorFadeTransition(4000, new Vector4f(1,0,1,0f), new Vector4f(0,0,0,1f), new InterpolationSineOut()),
 					new ColorFadeTransition( 600, new Vector4f(0,0,0,1f), new Vector4f(0,0,0,0), new InterpolationSineIn())
 					);
 			
 		// still playing
 		} else {
+			
+			int nEnemies = 0;
+			for(int x=0; x<cols; x++) {
+				for(int y=0; y<rows; y++) {
+					Cell cell = world.getCell(x, y);
+					for(int i=0; i<cell.getEntities().size(); i++) {
+						Entity e = cell.getEntities().get(i);
+						if(e instanceof Enemy) {
+							nEnemies++;
+						}
+					}
+				}
+			}
+			if(nEnemies == 0) {
+				if(waveCooldown <= 0) {
+					for(Enemy e : waveGenerator.getNext()) {
+						world.getCell(e.x, e.y).add(e);
+					}
+					waveCooldown = 1000;
+				} else {
+					waveCooldown-=deltaMS;
+				}
+			}
+			
 			
 			tick++;
 			
@@ -185,6 +240,7 @@ public class GameScene extends Scene {
 					for(int x=0; x<cols; x++) {
 						for(int y=0; y<rows; y++) {
 							Cell cell = world.getCell(x, y);
+							
 							for(int i=0; i<cell.getEntities().size(); i++) {
 								Entity e = cell.getEntities().get(i);
 								if(e.lastUpdate != tick) {
@@ -192,6 +248,7 @@ public class GameScene extends Scene {
 									e.lastUpdate = tick;
 								}
 							}
+							
 						}
 					}
 					nextTurn = true;
@@ -209,6 +266,7 @@ public class GameScene extends Scene {
 					turnType++;
 					if(turnType >= 3) {
 						turnType = 0;
+						Player.score += 5;
 					}
 					turnPause = turnPauseDur;
 					if(turnType == 0) {
@@ -218,8 +276,35 @@ public class GameScene extends Scene {
 				
 			}
 			
+			
 		}
 		
+		
+		// screenshape laser
+		for(int x=0; x<cols; x++) {
+			for(int y=0; y<rows; y++) {
+				Cell cell = world.getCell(x, y);
+				for(int i=0; i<cell.getEntities().size(); i++) {
+					Entity e = cell.getEntities().get(i);
+					if(e instanceof Laser) {
+						Laser laser = (Laser)e;
+						if(laser.getState() == 0) {
+							GameScene.shakeFrames = Math.max(GameScene.shakeFrames, 2);
+							GameScene.shakeSize = Math.max(GameScene.shakeSize, 1);
+						}
+						if(laser.getState() == 1) {
+							GameScene.shakeFrames = Math.max(GameScene.shakeFrames, 2);
+							GameScene.shakeSize = Math.max(GameScene.shakeSize, 5);
+						}
+						if(laser.getState() == 2) {
+							GameScene.shakeFrames = Math.max(GameScene.shakeFrames, 2);
+							GameScene.shakeSize = Math.max(GameScene.shakeSize, 2);
+						}
+					}
+				}
+				
+			}
+		}
 		
 		
 		// RENDER
@@ -228,14 +313,22 @@ public class GameScene extends Scene {
 		shapeRenderer.begin(ShapeType.Filled);
 		shapeRenderer.setColor(0.0f, 0.0f, 0.0f, 1f);
 		shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		shapeRenderer.end();
+		
+		batch.enableBlending();
+		batch.begin();
+		batch.draw(texGlow, 0, 0);
+		batch.end();
+		batch.disableBlending();
 		
 		// DRAW STARS
+		shapeRenderer.begin(ShapeType.Filled);
 		shapeRenderer.setColor(0.8f, 0.8f, 0.8f, 1f);
 		
 		for(int i=0; i<N_STARS; i++) {
 			Vector3f star = stars[i];
 			star.x -= star.z;
-			if(star.x < -20) {
+			if(star.x < 0) {
 				star.x += cols*cellSize;
 			}
 			shapeRenderer.rect(star.x, star.y, 1, 1);
@@ -249,12 +342,23 @@ public class GameScene extends Scene {
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 		
+		int gridOffX = 0;
+		int gridOffY = 0;
+
+		Random random = new Random();
+		
+		if(shakeFrames > 0) {
+			shakeFrames--;
+			gridOffX = random.nextInt(shakeSize*2)-shakeSize;
+			gridOffY = random.nextInt(shakeSize*2)-shakeSize;
+		}
+		
 		for(int x=0; x<cols; x++) {
 			for(int y=0; y<rows; y++) {
 				shapeRenderer.setColor(1f, 1f, 1f, 0.2f);
-				shapeRenderer.rect(x*cellSize, y*cellSize, cellSize, cellSize);
+				shapeRenderer.rect(gridOffX+x*cellSize, gridOffY+y*cellSize, cellSize, cellSize);
 				shapeRenderer.setColor(0f, 0f, 1f, 0.3f);
-				shapeRenderer.rect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+				shapeRenderer.rect(gridOffX+x*cellSize+1, gridOffY+y*cellSize+1, cellSize-2, cellSize-2);
 			}
 		}
 		shapeRenderer.end();
@@ -279,10 +383,12 @@ public class GameScene extends Scene {
 					batch.setColor(0f, 0f, 0f, 1f);
 					
 					if(e instanceof Player) {
+						batch.setColor(0f, 1f, 1f, 1f);
 						batch.draw(texPlayer, x*cellSize, y*cellSize, 100, 100);
 					}
 					
 					if(e instanceof Enemy) {
+						batch.setColor(1f, 0f, 1f, 1f);
 						if(e instanceof CircleEnemy) {
 							batch.draw(texEnemyCircle, x*cellSize, y*cellSize, 100, 100);
 						}
@@ -296,34 +402,34 @@ public class GameScene extends Scene {
 					
 					if(e instanceof Bullet) {
 						if( ((Bullet)e).source instanceof Player ) {
-							batch.setColor(0f, 0f, 1f, 1f);
+							batch.setColor(0f, 1f, 1f, 1f);
 						} else {
-							batch.setColor(1f, 0f, 0f, 1f);
+							batch.setColor(1f, 0f, 1f, 1f);
 						}
 						batch.draw(texBullet, x*cellSize, y*cellSize, 100, 100);
 					}
 					if(e instanceof Bomb) {
 						if( ((Bomb)e).source instanceof Player ) {
-							batch.setColor(0f, 0f, 1f, 1f);
+							batch.setColor(0f, 1f, 1f, 1f);
 						} else {
-							batch.setColor(1f, 0f, 0f, 1f);
+							batch.setColor(1f, 0f, 1f, 1f);
 						}
 						batch.draw(texBomb, x*cellSize, y*cellSize, 100, 100);
 					}
 					if(e instanceof Laser) {
 						
 						if( ((Laser)e).source instanceof Player ) {
-							batch.setColor(0f, 0f, 1f, 1f);
+							batch.setColor(0f, 1f, 1f, 1f);
 						} else {
-							batch.setColor(1f, 0f, 0f, 1f);
+							batch.setColor(1f, 0f, 1f, 1f);
 						}
 						
 						int state = ((Laser)e).getState();
 						if(state == 0) {
 							if( ((Laser)e).source instanceof Player ) {
-								batch.setColor(0f, 0f, 1f, 0.5f);
+								batch.setColor(0f, 1f, 1f, 0.5f);
 							} else {
-								batch.setColor(1f, 0f, 0f, 0.5f);
+								batch.setColor(1f, 0f, 1f, 0.5f);
 							}
 							batch.draw(texLaser, x*cellSize, y*cellSize+45, 100, 10);
 						}
@@ -343,7 +449,11 @@ public class GameScene extends Scene {
 		batch.end();
 		batch.setBlendFunction(srcFunc, dstFunc);
 
+		
+		// draw particles
+		particleMng.update(deltaMS);
 
+		
 		// draw GUI
 		batch.begin();
 		batch.setColor(1f, 1f, 1f, 1f);
@@ -351,11 +461,13 @@ public class GameScene extends Scene {
 		
 		font.draw(batch, "HULL:", 10, Gdx.graphics.getHeight()-4, 150, Align.right, false);
 		font.draw(batch, player.health+"%", 170, Gdx.graphics.getHeight()-4, 100, Align.right, false);
-		font.draw(batch, "POWER:", 10, Gdx.graphics.getHeight()-40, 150, Align.right, false);
+		font.draw(batch, "ENERGY:", 10, Gdx.graphics.getHeight()-40, 150, Align.right, false);
 		font.draw(batch, player.power+"%", 170, Gdx.graphics.getHeight()-40, 100, Align.right, false);
 
-		font.draw(batch, "SCORE:", Gdx.graphics.getWidth()-300, Gdx.graphics.getHeight()-20, 150, Align.right, false);
-		font.draw(batch, player.score+"", Gdx.graphics.getWidth()-160, Gdx.graphics.getHeight()-20, 100, Align.right, false);
+		font.draw(batch, "SCORE:", Gdx.graphics.getWidth()-300, Gdx.graphics.getHeight()-4, 150, Align.right, false);
+		font.draw(batch, Player.score+"", Gdx.graphics.getWidth()-160, Gdx.graphics.getHeight()-4, 100, Align.right, false);
+		font.draw(batch, "TURN:", Gdx.graphics.getWidth()-300, Gdx.graphics.getHeight()-40, 150, Align.right, false);
+		font.draw(batch, turn+"", Gdx.graphics.getWidth()-160, Gdx.graphics.getHeight()-40, 100, Align.right, false);
 		
 		batch.draw(textureItems, 480, Gdx.graphics.getHeight()-90);
 		
@@ -371,6 +483,9 @@ public class GameScene extends Scene {
 	
 	@Override
 	public void unload() {
+		particleMng.unload();
+		particleMng = null;
+		texGlow.dispose();
 		lightenShader.dispose();
 		defaultShader.dispose();
 		shapeRenderer.dispose();
